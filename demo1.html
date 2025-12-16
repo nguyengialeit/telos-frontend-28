@@ -1,0 +1,67 @@
+<html lang="en">
+
+<head>
+  <title>Hello!</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+    integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    document.addEventListener('keydown', function (event) {
+      // Kiểm tra nếu người dùng nhấn Ctrl + S
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault(); // Ngừng hành động mặc định (lưu trang)
+
+        // Chụp ảnh màn hình
+        takeScreenshot();
+      }
+    });
+
+    async function takeScreenshot() {
+      try {
+        // Sử dụng thư viện html2canvas để chụp ảnh trang web
+        const canvas = await html2canvas(document.body);
+
+        // Chuyển canvas thành dữ liệu hình ảnh PNG
+        const imgData = canvas.toDataURL('image/png');
+
+        // Tạo Blob từ ảnh PNG
+        const byteString = atob(imgData.split(',')[1]);
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < byteString.length; i++) {
+          uint8Array[i] = byteString.charCodeAt(i);
+        }
+
+        const blob = new Blob([uint8Array], { type: 'image/png' });
+
+        // Mở hộp thoại lưu file cho người dùng
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'screenshot.png',
+          types: [{
+            description: 'PNG files',
+            accept: { 'image/png': ['.png'] }
+          }]
+        });
+
+        // Tạo writable stream và ghi dữ liệu vào file
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        console.log('File đã được lưu thành công!');
+      } catch (err) {
+        console.error('Lỗi khi lưu file:', err);
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <a href="google.com">This is a link</a>
+  <b>Bold</b>
+  <i>Italic</i>
+  <u>Underline</u>
+</body>
+
+</html>
